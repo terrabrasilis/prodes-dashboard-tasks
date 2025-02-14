@@ -64,7 +64,7 @@ class DatabaseManager:
         try:
             with psycopg2.connect(**database_params) as conn:
                 conn.isolation_level
-                return('✅ Connection successful 🚀')
+            return('✅ Connection successful 🚀')
         except psycopg2.OperationalError as e:
             raise AirflowFailException(f'❌ Connection failed: {e}')
         except psycopg2.Error as e:
@@ -94,9 +94,7 @@ class DatabaseManager:
                                             'SELECT geom FROM {consolidated_data} WHERE class_name = ''d{year}'' ORDER BY uid'
                                         ) AS t(geom geometry(MultiPolygon, 4674));
                                     """)
-
-                    conn.commit()
-                    
+                conn.commit()
             return f'✅ Views created successfully 🚀 ({len(self.biomes)} views criadas)'
         
         except Exception as e:
@@ -131,16 +129,15 @@ class DatabaseManager:
                                             END IF;
                                         END $$;
                                     ''')
-
-                                conn.commit()
-                    return f'✅ Tables and indexes created successfully 🚀 ({len(self.biomes)} tables created)'
+                conn.commit()
+            return f'✅ Tables and indexes created successfully 🚀 ({len(self.biomes)} tables created)'
         except Exception as e:
             raise AirflowFailException(f'❌ Error in Create Table Task: {e}')
         
         
     def update_tables(self):
         try:
-           with psycopg2.connect(**database_params) as conn:
+            with psycopg2.connect(**database_params) as conn:
                 with conn.cursor() as cursor:
                     
                     for biome in self.biomes:
@@ -152,14 +149,15 @@ class DatabaseManager:
                                     view_name = data['view_name']
                                     print((f'''INSERT INTO private.{table_name} (geom) SELECT geom FROM {view_name};'''))
                                     cursor.execute(f'''INSERT INTO private.{table_name} (geom) SELECT geom FROM {view_name};''')
-                    conn.commit()
-                    return f'✅ Tables updatedes successfully 🚀 ({len(self.biomes)} tables updated)' 
+                conn.commit()
+            return f'✅ Tables updatedes successfully 🚀 ({len(self.biomes)} tables updated)' 
         except Exception as e:
             raise AirflowFailException(f'❌ Error in Update Table Task: {e}')
             
             
     def create_subdivided_tables(self):
-        with psycopg2.connect(**database_params) as conn:
+        try:
+            with psycopg2.connect(**database_params) as conn:
                 with conn.cursor() as cursor:
                     
                     for biome in self.biomes:
@@ -170,11 +168,14 @@ class DatabaseManager:
                                     cursor.execute
                                     (f'''
                                         DROP TABLE IF EXISTS private.{table_name}_subdivided CASCADE;
-                                        CREATE TABLE private.{table_name}_subdivided AS SELECT gid || '_' || gen_random_uuid() AS fid, st_subdivide(geom) AS geom FROM private.{table_name};
+                                        CREATE TABLE private.{table_name}_subdivided AS SELECT gid || '_' || gen_random_uuid() AS fid, 
+                                        st_subdivide(geom) AS geom FROM private.{table_name};
                                         CREATE INDEX {table_name}_subdivided_geom_idx ON private.{table_name}_subdivided USING GIST (geom);
                                     ''')
-                                conn.commit()
-                                return f'✅ Subdivided tables created successfully 🚀 ({len(self.biomes)} Subdivided tables created)'
+                    conn.commit()
+                return f'✅ Subdivided tables created successfully 🚀 ({len(self.biomes)} Subdivided tables created)'
+        except Exception as e:
+            raise AirflowFailException(f'❌ Error in Create Subdivided Table Task: {e}')
    
     
 with DAG(
