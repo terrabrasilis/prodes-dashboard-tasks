@@ -302,8 +302,7 @@ with DAG(
     default_args=default_args,
     schedule_interval='@daily',
     catchup=False,
-    description='''DAG to export data from database prodes_cerrado_nb_p2024 
-    table yearly_deforestation to database dashboard-data-model table private.cerrado_2024''',
+    description='''DAG to export data from prodes biome database to dashboard-data-model database.''',
 ) as dag:
     
     db_manager = DatabaseManager()
@@ -320,7 +319,6 @@ with DAG(
     
     create_tables = PythonOperator(
         task_id='create_tables',
-        op_kwargs={'message_text': 'PRODES data update process finished.'},
         python_callable=db_manager.create_tables,
     )
     
