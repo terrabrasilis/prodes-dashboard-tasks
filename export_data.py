@@ -6,7 +6,6 @@ from datetime import datetime
 from email.mime.text import MIMEText
 from airflow.hooks.base import BaseHook
 from email.mime.multipart import MIMEMultipart
-from airflow.operators.bash import BashOperator
 from airflow.utils.trigger_rule import TriggerRule
 from airflow.exceptions import AirflowFailException
 from airflow.operators.python import PythonOperator
@@ -40,14 +39,16 @@ port = email_config.port
 sender_email = "guilherme.anderson34@outlook.com"
 receiver_email = "guilherme.anderso1@gmail.com"
 
-# Currently the complete biomes list are: "pampa, caatinga, mata_atlantica, pantanal, amazon, amazon_nf, cerrado, legal_amazon"
+# Currently the complete biomes list are: "pampa, caatinga, mata_atlantica,
+# pantanal, amazon, amazon_nf, cerrado, legal_amazon"
 
-# If you want to generate for Amazon biomes, always check the consolidated_data object 
-# because if you only have data in the priority table, the name must be adjusted
+# If you want to generate for Amazon biomes, always check the
+# consolidated_data object because if you only have data in
+# the priority table, the name must be adjusted
 
 config = [
     {
-        "cerrado":{
+        "cerrado": {
             "id_data": 1,
             "db_name": "prodes_cerrado_nb_p2024",
             "consolidated_data": "yearly_deforestation",
@@ -55,7 +56,7 @@ config = [
             "table_name": "cerrado_2024",
             "year": 2024,
         },
-        "amazon":{
+        "amazon": {
             "id_data": 2,
             "db_name": "prodes_amazonia_nb_p2024_11_02_2025",
             "consolidated_data": "yearly_deforestation_2024_pri_biome",
@@ -63,7 +64,7 @@ config = [
             "table_name": "amazon_2024",
             "year": 2024,
         },
-        "legal_amazon":{
+        "legal_amazon": {
             "id_data": 3,
             "year": 2024,
             "db_name": "prodes_amazonia_nb_p2024_11_02_2025",
@@ -71,7 +72,7 @@ config = [
             "view_name": "legal_amazon_nb_p2024",
             "table_name": "legal_amazon_2024",
         },
-        "pampa":{
+        "pampa": {
             "id_data": 4,
             "year": 2024,
             "db_name": "prodes_pampa_nb_p2023-14-02-2025",
@@ -79,7 +80,7 @@ config = [
             "view_name": "pampa_nb_p2024",
             "table_name": "pampa_2024",
         },
-        "mata_atlantica":{
+        "mata_atlantica": {
             "id_data": 5,
             "year": 2024,
             "db_name": "prodes_mata_atlantica_nb_p2023-14-02-2025",
@@ -87,7 +88,7 @@ config = [
             "view_name": "mata_atlantica_nb_p2024",
             "table_name": "mata_atlantica_2024",
         },
-        "caatinga":{
+        "caatinga": {
             "id_data": 6,
             "db_name": "prodes_caatinga_nb_p2023-14-02-2025",
             "consolidated_data": "yearly_deforestation",
@@ -95,7 +96,7 @@ config = [
             "table_name": "caatinga_2024",
             "year": 2024,
         },
-        "pantanal":{
+        "pantanal": {
             "id_data": 7,
             "db_name": "prodes_pantanal_nb_p2023-14-02-2025",
             "consolidated_data": "yearly_deforestation",
@@ -103,7 +104,7 @@ config = [
             "table_name": "pantanal_2024",
             "year": 2024,
         },
-        "amazon_nf":{
+        "amazon_nf": {
             "id_data": 8,
             "db_name": "prodes_amazonia_nb_p2024_11_02_2025",
             "consolidated_data": "yearly_deforestation",
@@ -116,11 +117,9 @@ config = [
 
 
 class DatabaseManager:
-    
     def __init__(self):
-        self.biomes = ['caatinga', 'pantanal']
-    
-    
+        self.biomes = ['caatinga', 'pantanal', 'cerrado']
+
     def create_periodes(self):
         try:
             messages = []
