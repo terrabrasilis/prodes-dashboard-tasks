@@ -155,8 +155,7 @@ class DatabaseManager:
 
         except Exception as e:
             raise AirflowFailException(f'❌ Error: {e}')
-                
-                
+                          
     def create_views(self):
         try:
             messages = []
@@ -187,8 +186,7 @@ class DatabaseManager:
             return "\n".join(messages)
         
         except Exception as e:
-            raise AirflowFailException(f'❌ Error: {e}')
-                  
+            raise AirflowFailException(f'❌ Error: {e}')            
                 
     def create_tables(self):
         try:
@@ -226,8 +224,7 @@ class DatabaseManager:
             
         except Exception as e:
             raise AirflowFailException(f'❌ Error in Create Table Task: {e}')
-        
-        
+                
     def update_tables(self):
         try:
             messages = []
@@ -248,8 +245,7 @@ class DatabaseManager:
             return "\n".join(messages)
         except Exception as e:
             raise AirflowFailException(f'❌ Error in Update Table Task: {e}')
-            
-            
+                        
     def create_subdivided_tables(self):
         try:
             messages = []
@@ -274,8 +270,7 @@ class DatabaseManager:
             return "\n".join(messages)
         except Exception as e:
             raise AirflowFailException(f'❌ Error in Create Subdivided Table Task: {e}')
-        
-        
+                
     def send_email(self, subject, body):
         try:
             msg = MIMEMultipart()
@@ -299,43 +294,43 @@ class DatabaseManager:
        
 with DAG(
     'export_data',
-    default_args=default_args,
-    schedule_interval='@daily',
-    catchup=False,
-    description='''DAG to export data from prodes biome database to dashboard-data-model database.''',
+    default_args = default_args,
+    schedule_interval = None, # None to run manually
+    catchup = False,
+    description = '''DAG to export data from prodes biome database to dashboard-data-model database.''',
 ) as dag:
     
     db_manager = DatabaseManager()
            
     create_periodes = PythonOperator(
-        task_id='create_periodes',
-        python_callable=db_manager.create_periodes,
+        task_id = 'create_periodes',
+        python_callable = db_manager.create_periodes,
     )
     
     create_views = PythonOperator(
-        task_id='create_views',
-        python_callable=db_manager.create_views,
+        task_id = 'create_views',
+        python_callable = db_manager.create_views,
     )
     
     create_tables = PythonOperator(
-        task_id='create_tables',
-        python_callable=db_manager.create_tables,
+        task_id = 'create_tables',
+        python_callable = db_manager.create_tables,
     )
     
     update_tables = PythonOperator(
-        task_id='update_tables',
-        python_callable=db_manager.update_tables,
+        task_id = 'update_tables',
+        python_callable = db_manager.update_tables,
     )  
     
     create_subdivided_tables = PythonOperator(
-        task_id='create_subdivided_tables',
-        python_callable=db_manager.create_subdivided_tables,
+        task_id = 'create_subdivided_tables',
+        python_callable = db_manager.create_subdivided_tables,
     )
     
     send_success_message = PythonOperator(
-        task_id='send_success_message',
-        python_callable=db_manager.send_email,
-        op_kwargs={
+        task_id = 'send_success_message',
+        python_callable = db_manager.send_email,
+        op_kwargs = {
             "subject": "Success on Export Prodes Data",
             "body": "Hello, Prodes data export process, carried out successfully!"
         },
@@ -343,9 +338,9 @@ with DAG(
     )
         
     send_fail_message = PythonOperator(
-        task_id='send_fail_message',
-        python_callable=db_manager.send_email,
-        op_kwargs={
+        task_id = 'send_fail_message',
+        python_callable = db_manager.send_email,
+        op_kwargs = {
             "subject": "Fail on Export Prodes Data",
             "body": "Hello, An error occurred in the process of exporting the prodes data."
         },
