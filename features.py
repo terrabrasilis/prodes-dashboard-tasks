@@ -77,7 +77,7 @@ config = [
 
 class Features:
     def __init__(self):
-        self.biomes = ['amazon', 'cerrado']
+        self.biomes = ['cerrado']
 
     def compute_years(self, **kwargs):
         try:

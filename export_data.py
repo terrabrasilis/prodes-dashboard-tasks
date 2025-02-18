@@ -9,6 +9,7 @@ from email.mime.multipart import MIMEMultipart
 from airflow.utils.trigger_rule import TriggerRule
 from airflow.exceptions import AirflowFailException
 from airflow.operators.python import PythonOperator
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 
 
 default_args = {
@@ -118,7 +119,7 @@ config = [
 
 class DatabaseManager:
     def __init__(self):
-        self.biomes = ['caatinga', 'pantanal', 'cerrado']
+        self.biomes = ['cerrado']
 
     def create_periodes(self):
         try:
@@ -346,13 +347,19 @@ with DAG(
         },
         trigger_rule=TriggerRule.ONE_FAILED
     )
+
+    trigger_dag_features = TriggerDagRunOperator(
+        task_id="trigger_dag_features",
+        trigger_dag_id="features",
+        wait_for_completion=False,
+    )
         
     # Order of tasks
     create_periodes >> create_views
-    create_views >> create_tables >> update_tables >> create_subdivided_tables >> send_success_message
+    create_views >> create_tables >> update_tables >> create_subdivided_tables >> send_success_message >> trigger_dag_features
 
     # Failure capture
-    [create_periodes, create_views, create_tables, update_tables, create_subdivided_tables] >> send_fail_message
+    [create_periodes, create_views, create_tables, update_tables, create_subdivided_tables, trigger_dag_features] >> send_fail_message
 
     # Successful capture
     create_subdivided_tables >> send_success_message
